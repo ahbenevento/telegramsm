@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 )
 
 //  //  //
@@ -22,10 +27,28 @@ func main() {
 	}
 
 	fmt.Println(cfg)
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+
+	defer cancel()
+
+	opts := []bot.Option{
+		bot.WithDefaultHandler(func(ctx context.Context, b *bot.Bot, update *models.Update) {
+			fmt.Println(update.Message.Chat.ID)
+			cancel()
+		}),
+	}
+
+	b, err := bot.New(
+		"5483339458:AAGa9EFtIpOWleiKCJ-c7FsJzzxrB-twzII",
+		opts...,
+	)
+
+	b.Start(ctx)
 }
 
 func showHelp() {
-	fmt.Print(`telegramsm alias-bot chat-id message
+	fmt.Print(`telegramsm bot-name chat-id message
 
 Very simple example to send messages using Telegram bots.
 
