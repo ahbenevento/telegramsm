@@ -1,13 +1,9 @@
 package main
 
 import (
-	"context"
+	"flag"
 	"fmt"
 	"os"
-	"os/signal"
-
-	"github.com/go-telegram/bot"
-	"github.com/go-telegram/bot/models"
 )
 
 //  //  //
@@ -20,42 +16,72 @@ func main() {
 		return
 	}
 
+	os.Args = os.Args[1:]
+	pvalues := []string{}
+
+	for i, arg := range os.Args {
+		if arg[0] == '-' {
+			pvalues = os.Args[0:i]
+			os.Args = os.Args[i:]
+			break
+		}
+	}
+
+	if len(pvalues) == 0 {
+		showHelp()
+		return
+	}
+
 	cfg, err := loadConfig(CONFIG_FILENAME)
 
 	if err != nil {
 		exitWithError(err.Error())
 	}
 
-	fmt.Println(cfg)
+	botToken, ok := cfg.Bots[pvalues[0]]
 
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-
-	defer cancel()
-
-	opts := []bot.Option{
-		bot.WithDefaultHandler(func(ctx context.Context, b *bot.Bot, update *models.Update) {
-			fmt.Println(update.Message.Chat.ID)
-			cancel()
-		}),
+	if !ok {
+		exitWithError(fmt.Sprintf("bot not found with the name: \"%s\"", pvalues[0]))
 	}
 
-	b, err := bot.New(
-		"5483339458:AAGa9EFtIpOWleiKCJ-c7FsJzzxrB-twzII",
-		opts...,
+	var (
+		getChatID  bool
+		saveChatID bool
 	)
 
-	b.Start(ctx)
+	args := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+
+	args.BoolVar(&getChatID, "chid", false, "Get chat ID")
+	args.BoolVar(&saveChatID, "s", false, "Save the chat ID retrieved to config file")
+
+	if err := args.Parse(os.Args); err != nil {
+		exitByInvalidArguments(err.Error())
+	} else if getChatID {
+		getLastChatIDFromMessage(pvalues[0], botToken, args.Arg(0))
+	}
 }
 
 func showHelp() {
-	fmt.Print(`telegramsm bot-name chat-id message
+	fmt.Print(`Very simple example to send messages using Telegram bots.
 
-Very simple example to send messages using Telegram bots.
+USES:
 
+telegramsm bot-name chat-id|username message
+
+  Send message to chat ID or username (config file).
+
+telegramsm bot-name -chid [-s] [username]
+
+  Get a chat ID from last message recieved for the bot.
 `)
 }
 
 func exitWithError(error string) {
-	fmt.Fprintf(os.Stderr, "Error: %s.\n", error)
+	colors.clrError.Fprintf(os.Stderr, "Error: %s\n", error)
 	os.Exit(1)
+}
+
+func exitByInvalidArguments(error string) {
+	fmt.Fprintf(os.Stderr, "%s\nType \"telegramsm\" without parameters for help.\n", colors.clrError.Sprintf("Error: %s", error))
+	os.Exit(2)
 }
