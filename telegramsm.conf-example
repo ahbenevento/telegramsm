@@ -1,0 +1,8 @@
+{
+    "bots": {
+        "name": "token"
+    },
+    "users": {
+        "chat-id": "username"
+    }
+}

@@ -26,7 +26,7 @@ func getLastChatIDFromMessage(cfg *appConfig, botName, username string) (configU
 	defer cancel()
 
 	funcPrintMessage := func() {
-		fmt.Printf("Please, send a message to the bot \"%s\"...\n", colors.clrHighlighted.Sprint(botName))
+		fmt.Printf("Por favor, envía un mensaje al bot \"%s\"...\n", colors.clrHighlighted.Sprint(botName))
 	}
 	opts := []bot.Option{
 		bot.WithDefaultHandler(func(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -37,7 +37,7 @@ func getLastChatIDFromMessage(cfg *appConfig, botName, username string) (configU
 
 				if username != "" {
 					fmt.Printf(
-						"User %s (%s): %s\n",
+						"Usuario %s (%s): %s\n",
 						colors.clrBold.Sprint(strings.TrimSpace(strings.Join([]string{update.Message.From.FirstName, update.Message.From.LastName}, " "))),
 						colors.clrHighlighted.Sprint(username),
 						colors.clrHighlighted.Sprintf("%d", update.Message.From.ID),

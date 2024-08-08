@@ -15,7 +15,7 @@ func getBotTokenByName(bots botList, botName string) (string, error) {
 		return token, nil
 	}
 
-	return "", fmt.Errorf("bot not found with the name: \"%s\"", botName)
+	return "", fmt.Errorf("bot no encontrado: \"%s\"", botName)
 }
 
 func getUserID(users userList, username string) (int64, error) {
@@ -33,5 +33,5 @@ func getUserID(users userList, username string) (int64, error) {
 		}
 	}
 
-	return 0, fmt.Errorf("user not found: \"%s\"", username)
+	return 0, fmt.Errorf("usuario no encontrado: \"%s\"", username)
 }

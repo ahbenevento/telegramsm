@@ -10,23 +10,12 @@ import (
 
 const CONFIG_FILENAME string = "telegramsm.conf"
 
-// telegramsm bot-name chat-id|username message [...]
-// telegramsm bot-name -chid [-s] [username]
+// telegramsm nombre-bot id-chat|usuario mensaje [mensaje ...]
+// telegramsm -chid nombre-bot [-s] [usuario]
 func main() {
 	if len(os.Args) == 1 {
 		showHelp()
 		return
-	}
-
-	os.Args = os.Args[1:]
-	pvalues := []string{}
-
-	for i, arg := range os.Args {
-		if arg[0] == '-' {
-			pvalues = os.Args[0:i]
-			os.Args = os.Args[i:]
-			break
-		}
 	}
 
 	cfg, err := loadConfig(CONFIG_FILENAME)
@@ -35,7 +24,10 @@ func main() {
 		exitWithError(err.Error())
 	}
 
-	if len(pvalues) == 0 {
+	os.Args = os.Args[1:]
+
+	if os.Args[0][0] != '-' {
+		// Enviar mensaje
 		if len(os.Args) >= 3 {
 			if err := sendMessage(*cfg, os.Args[0], os.Args[1], os.Args[2:]...); err != nil {
 				exitWithError(err.Error())
@@ -47,20 +39,21 @@ func main() {
 		return
 	}
 
+	// Obtener ID de chat
 	var (
-		getChatID  bool
+		getChatID  string
 		saveChatID bool
 	)
 
-	args := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+	args := flag.NewFlagSet("telegramsm", flag.ContinueOnError)
 
-	args.BoolVar(&getChatID, "chid", false, "Get chat ID")
-	args.BoolVar(&saveChatID, "s", false, "Save the chat ID retrieved to config file")
+	args.StringVar(&getChatID, "chid", "", "Obtener el ID del chat.")
+	args.BoolVar(&saveChatID, "s", false, "Guardar los datos en el archivo de configuración.")
 
 	if err := args.Parse(os.Args); err != nil {
 		exitByInvalidArguments(err.Error())
-	} else if getChatID {
-		configUpdated, err := getLastChatIDFromMessage(cfg, pvalues[0], args.Arg(0))
+	} else if getChatID != "" {
+		configUpdated, err := getLastChatIDFromMessage(cfg, getChatID, args.Arg(0))
 
 		if err != nil {
 			exitWithError(err.Error())
@@ -71,26 +64,27 @@ func main() {
 				exitWithError(err.Error())
 			}
 		}
-
-		return
 	}
-
-	fmt.Println(pvalues, os.Args)
 }
 
 func showHelp() {
-	fmt.Print(`Very simple example to send messages using Telegram bots.
+	fmt.Print(`Ejemplo muy simple para el envío de mensajes utilizando un Bot de Telegram.
 
-USES:
+USOS:
 
-telegramsm bot-name chat-id|username message [...]
+telegramsm nombre-bot id-chat|usuario mensaje [mensaje ...]
 
-  Send message to chat ID or username (stored in config file).
+  Envía un mensaje utiliando el ID del chat o nombre de usuario (guardado en el
+  archivo de configuración).
 
-telegramsm -chid bot-name [-s] [username]
+telegramsm -chid nombre-bot [-s] [usuario]
 
-  Get a chat ID from last message recieved for the bot. Use "-s" to save in
-  config file.
+  Obtiene el ID del último mensaje enviado al bot. Usa el parámetro "-s" para
+  guardar en el archivo de configuración la combinación de nombre de usuario e
+  ID del chat.
+
+  Si se establece un valor para "usuario" este reemplazará al definido en
+  Telegram.
 `)
 }
 
@@ -100,6 +94,6 @@ func exitWithError(error string) {
 }
 
 func exitByInvalidArguments(error string) {
-	fmt.Fprintf(os.Stderr, "%s\nType \"telegramsm\" without parameters for help.\n", colors.clrError.Sprintf("Error: %s", error))
+	fmt.Fprintf(os.Stderr, "%s\nEscribe \"telegramsm\" sin parámetros para obtener ayuda.\n", colors.clrError.Sprintf("Error: %s", error))
 	os.Exit(2)
 }
