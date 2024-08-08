@@ -1,33 +1,32 @@
-# Send messages to Telegram using bots
+# Ejemplo muy simple para el envío de mensajes utilizando un Bot de Telegram
 
-Very simple example to send messages using Telegram bots.
-
-Packages used:
+Paquetes utilizados:
 
 - [fatih/color](https://github.com/fatih/color)
 - [go-telegram/bot](https://github.com/go-telegram/bot)
 
-## Uses
+## Usos
 
-### Send message
-
-```console
-telegramsm bot-name chat-id|username message [...]
-```
-
-- **bot-name** The name of the bot stored in config file.
-- **chat-id** Number of chat identify.
-- **username** Nickname or alias stored in config file.
-- **message** One o more messages to send.
-
-### Get chat ID
-
-Prints and saves the chat ID of the last message sent to the Telegram bot.
+### Enviar mensaje
 
 ```console
-telegramsm -chid bot-name [-s] [username]
+telegramsm nombre-bot id-chat|usuario mensaje [mensaje ...]
 ```
 
-- **bot-name** The name of the bot stored in config file.
-- **-s** Save data in config file.
-- **username** User's nickname to save in config file (replaces the username defined in Telegram).
+- **nombre-bot** El nombre del bot guardado en el archivo de configuración.
+- **id-chat** Identificador del chat.
+- **usuario** El nombre de usuario o alias guardado en el archivo de configuración.
+- **message** Uno o más mensajes a enviar.
+
+### Obtener ID de chat
+
+Imprime y guarda el identificador de chat del último mensaje enviado al bot de
+Telegram.
+
+```console
+telegramsm -chid nombre-bot [-s] [usuario]
+```
+
+- **nombre-bot** El nombre del bot guardado en el archivo de configuración.
+- **-s** Guarda en el archivo de configuración la combinación de nombre de usuario e identificador.
+- **usuario** El nombre de usuario a guardar en el archivo de configuración (reemplaza al definido en Telegram).

@@ -68,20 +68,20 @@ func main() {
 }
 
 func showHelp() {
-	fmt.Print(`Ejemplo muy simple para el envío de mensajes utilizando un Bot de Telegram.
+	fmt.Print(`Ejemplo muy simple para el envío de mensajes utilizando un Bot de Telegram
 
 USOS:
 
 telegramsm nombre-bot id-chat|usuario mensaje [mensaje ...]
 
-  Envía un mensaje utiliando el ID del chat o nombre de usuario (guardado en el
-  archivo de configuración).
+  Envía uno o más mensajes utiliando el ID del chat o nombre de usuario
+  (guardado en el archivo de configuración).
 
 telegramsm -chid nombre-bot [-s] [usuario]
 
   Obtiene el ID del último mensaje enviado al bot. Usa el parámetro "-s" para
   guardar en el archivo de configuración la combinación de nombre de usuario e
-  ID del chat.
+  identificador.
 
   Si se establece un valor para "usuario" este reemplazará al definido en
   Telegram.
