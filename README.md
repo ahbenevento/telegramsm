@@ -22,6 +22,8 @@ telegramsm bot-name chat-id|username message [...]
 
 ### Get chat ID
 
+Prints and saves the chat ID of the last message sent to the Telegram bot.
+
 ```console
 telegramsm -chid bot-name [-s] [username]
 ```
