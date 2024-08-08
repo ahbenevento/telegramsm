@@ -10,6 +10,8 @@ import (
 
 const CONFIG_FILENAME string = "telegramsm.conf"
 
+// telegramsm bot-name chat-id|username message [...]
+// telegramsm bot-name -chid [-s] [username]
 func main() {
 	if len(os.Args) == 1 {
 		showHelp()
@@ -27,21 +29,22 @@ func main() {
 		}
 	}
 
-	if len(pvalues) == 0 {
-		showHelp()
-		return
-	}
-
 	cfg, err := loadConfig(CONFIG_FILENAME)
 
 	if err != nil {
 		exitWithError(err.Error())
 	}
 
-	botToken, ok := cfg.Bots[pvalues[0]]
+	if len(pvalues) == 0 {
+		if len(os.Args) >= 3 {
+			if err := sendMessage(*cfg, os.Args[0], os.Args[1], os.Args[2:]...); err != nil {
+				exitWithError(err.Error())
+			}
+		} else {
+			showHelp()
+		}
 
-	if !ok {
-		exitWithError(fmt.Sprintf("bot not found with the name: \"%s\"", pvalues[0]))
+		return
 	}
 
 	var (
@@ -57,8 +60,22 @@ func main() {
 	if err := args.Parse(os.Args); err != nil {
 		exitByInvalidArguments(err.Error())
 	} else if getChatID {
-		getLastChatIDFromMessage(pvalues[0], botToken, args.Arg(0))
+		configUpdated, err := getLastChatIDFromMessage(cfg, pvalues[0], args.Arg(0))
+
+		if err != nil {
+			exitWithError(err.Error())
+		}
+
+		if saveChatID && configUpdated {
+			if err := saveConfig(cfg, CONFIG_FILENAME); err != nil {
+				exitWithError(err.Error())
+			}
+		}
+
+		return
 	}
+
+	fmt.Println(pvalues, os.Args)
 }
 
 func showHelp() {
@@ -66,13 +83,14 @@ func showHelp() {
 
 USES:
 
-telegramsm bot-name chat-id|username message
+telegramsm bot-name chat-id|username message [...]
 
-  Send message to chat ID or username (config file).
+  Send message to chat ID or username (stored in config file).
 
-telegramsm bot-name -chid [-s] [username]
+telegramsm -chid bot-name [-s] [username]
 
-  Get a chat ID from last message recieved for the bot.
+  Get a chat ID from last message recieved for the bot. Use "-s" to save in
+  config file.
 `)
 }
 

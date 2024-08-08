@@ -11,10 +11,13 @@ import (
 
 type botList map[string]string
 
+type userList map[int64]string
+
 //  //  //
 
 type appConfig struct {
-	Bots botList `json:"bots"`
+	Bots  botList  `json:"bots"`
+	Users userList `json:"users,omitempty"`
 }
 
 //  //  //
@@ -39,7 +42,29 @@ func loadConfig(filename string) (*appConfig, error) {
 
 	if err != nil {
 		return nil, err
+	} else if result.Users == nil {
+		result.Users = make(userList)
 	}
 
 	return &result, nil
+}
+
+func saveConfig(cfg *appConfig, filename string) error {
+	f, err := os.Create(filename)
+
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	buf, err := json.MarshalIndent(cfg, "", "    ")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = f.Write(buf)
+
+	return err
 }

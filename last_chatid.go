@@ -14,12 +14,16 @@ import (
 
 //  //  //
 
-func getLastChatIDFromMessage(botName, token, username string) error {
+func getLastChatIDFromMessage(cfg *appConfig, botName, username string) (configUpdated bool, err error) {
+	token, err := getBotTokenByName(cfg.Bots, botName)
+
+	if err != nil {
+		return
+	}
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 
 	defer cancel()
-
-	var result error
 
 	funcPrintMessage := func() {
 		fmt.Printf("Please, send a message to the bot \"%s\"...\n", colors.clrHighlighted.Sprint(botName))
@@ -38,8 +42,14 @@ func getLastChatIDFromMessage(botName, token, username string) error {
 						colors.clrHighlighted.Sprint(username),
 						colors.clrHighlighted.Sprintf("%d", update.Message.From.ID),
 					)
+
+					// Buscar el usuario en la lista configurada
+					if cfgUsername, ok := cfg.Users[update.Message.From.ID]; !ok || cfgUsername != username {
+						cfg.Users[update.Message.From.ID] = username
+						configUpdated = true
+					}
 				} else {
-					result = errors.New("must be define username")
+					err = errors.New("must be define username")
 				}
 
 				cancel()
@@ -48,12 +58,12 @@ func getLastChatIDFromMessage(botName, token, username string) error {
 			}
 		}),
 	}
-	b, result := bot.New(token, opts...)
+	b, err := bot.New(token, opts...)
 
-	if result == nil {
+	if err == nil {
 		funcPrintMessage()
 		b.Start(ctx)
 	}
 
-	return result
+	return
 }
