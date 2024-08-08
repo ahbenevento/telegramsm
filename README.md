@@ -27,5 +27,5 @@ telegramsm -chid bot-name [-s] [username]
 ```
 
 - **bot-name** The name of the bot stored in config file.
-- **-s** Number of chat identify.
+- **-s** Save data in config file.
 - **username** User's nickname to save in config file (replaces the username defined in Telegram).
